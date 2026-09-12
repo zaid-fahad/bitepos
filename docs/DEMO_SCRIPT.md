@@ -1,61 +1,47 @@
-# BiteOS — Current Product Demo Script
+# BiteOS — Two-Minute Product Demo
 
-**Length:** 3:30–4:00 · **Format:** screen recording with English voiceover · **POS:** `http://localhost:5173` · **Kitchen TV:** `http://localhost:5173/kds`
+**Length:** 2:00 · **POS:** `http://localhost:5173` · **Kitchen TV:** `http://localhost:5173/kds`
 
-## Before recording
+Use a 720×1280 portrait POS window and a separate wide `/kds` window. Create three demo kitchen orders before recording. Move slowly and pause one second after each action.
 
-Run `docker compose up`. Use a 720×1280 portrait POS window and a second, wide `/kds` window. Create three demo kitchen orders before recording. Move the pointer slowly and pause 1–2 seconds after actions.
+## 1. One workspace — 0:00–0:15
 
-## 1. One workspace — 0:00–0:25
+**Voice:** “Rahim Bhai runs a Dhanmondi food stall. BiteOS replaces the delivery apps, paper tickets, payment checking, and calculator with one simple workspace.”
 
-**Voice:** “Rahim Bhai runs a busy Dhanmondi food stall. Before BiteOS, every order meant switching between delivery apps, paper tickets, messages, and a calculator. BiteOS brings the operation into one simple workspace.”
+**Screen:** Fade into the light BitePOS home screen. Hold on the header, Menu button, and Prep recommendation banner.
 
-**Screen:** Fade into the light BitePOS home screen. Hold on the header and Menu button.
+## 2. Explainable preparation insight — 0:15–0:30
 
-## 2. Explainable morning recommendation — 0:25–0:50
+**Voice:** “Before lunch, BiteOS turns delivery and weather context into a clear prep recommendation. The team can also see the evidence, assumptions, and confidence behind it.”
 
-**Voice:** “Before lunch, BiteOS turns weather and delivery context into a clear prep recommendation. The team can also see the evidence, assumptions, and confidence behind it.”
+**Screen:** Open **Menu → Intelligence**. Show the XAI panel. Return to Point of sale.
 
-**Screen:** Hold on the Prep recommendation banner. Open **Menu → Intelligence**. Show the XAI panel: Evidence, Assumption, Confidence. Return to Point of sale.
+## 3. Order, payment, and receipt — 0:30–1:00
 
-## 3. Counter order, QR, cash, and receipt — 0:50–1:35
+**Voice:** “At the counter, orders are tapped in seconds. Totals, VAT, and payment are handled in one flow.”
 
-**Voice:** “Orders are tapped in seconds. Totals, discount, and VAT update instantly. Digital payments get a payment-specific QR; cash uses the same fast confirmation flow.”
+**Screen:** Select Biryani and add Chicken Tehari. Select Burgers and add Classic Beef Burger. Show the cart. Tap Charge, hold on the bKash QR, tap Simulate bKash payment, then hold on the paper-feed receipt and ‘Printing receipt…’ state.
 
-**Screen:** Select Biryani; add Chicken Tehari twice. Select Burgers; add Classic Beef Burger. Show cart total. Tap Charge, hold on the bKash QR, tap Simulate bKash payment, and hold on the paper-feed receipt and ‘Printing receipt…’ status. Optional second take: select Cash to show the counter-payment panel.
+**Voice:** “BiteOS confirms payment in English and visibly prints the receipt. Cash is available in the same payment panel when the customer prefers it.”
 
-**Voice:** “Payment is confirmed aloud in English, and the receipt visibly feeds from the printer simulation. No manual SMS checking.”
+## 4. Active Orders and Kitchen TV — 1:00–1:25
 
-## 4. Active Orders and kitchen TV — 1:35–2:05
+**Voice:** “The counter stays focused. Live orders are one tap away, while the kitchen gets a dedicated TV display with urgent riders at the top.”
 
-**Voice:** “The counter stays focused. Active delivery tickets are one tap away; the kitchen gets a dedicated TV display with the most urgent ticket first.”
+**Screen:** Tap the floating Active Orders button and show the bottom sheet. Switch to `/kds`. Show channel labels, ETA ordering, and large tickets. Tap Mark ready on one ticket.
 
-**Screen:** Tap the round bottom-right Active Orders button, show the bottom sheet, then close it. Switch to `/kds`; show channel labels, ETA ordering, and large tickets. Tap Mark ready on one ticket.
+## 5. Availability control — 1:25–1:40
 
-## 5. Availability and Auto-86 — 2:05–2:25
+**Voice:** “When an item is unavailable, staff control it once and keep counter and delivery availability aligned.”
 
-**Voice:** “When a dish is unavailable, staff control it once and keep the counter and delivery channels aligned.”
+**Screen:** Open **Menu → Item availability**. Toggle Classic Beef Burger to Sold out, pause, then restore Active.
 
-**Screen:** Open **Menu → Item availability**. Toggle Classic Beef Burger to Sold out, pause, then restore Active. Return to POS stock labels.
+## 6. Intelligence and closing — 1:40–2:00
 
-## 6. Stock-in and margin defense — 2:25–2:55
+**Voice:** “BiteOS also helps prevent waste and closes the day with a clear financial recap. Orders, payments, kitchen flow, availability, and explainable intelligence—built for Dhaka and ready to scale.”
 
-**Voice:** “A market purchase takes seconds to log. BiteOS calculates unit cost and highlights the margin impact before a price problem becomes a loss.”
-
-**Screen:** Open **Menu → Inventory**. Choose Broiler Chicken; enter quantity `20`, total cost `3800`, then Save & Analyse. Show calculation and recommendation.
-
-## 7. WasteLess and closing recap — 2:55–3:30
-
-**Voice:** “BiteOS surfaces expiring-item promotions to reduce waste. At closing, it produces one clear recap of sales, channels, and tomorrow’s decisions.”
-
-**Screen:** Open **Menu → Intelligence**. Show WasteLess, apply a promotion, then generate the End-of-day recap. Hold on the recap slip.
-
-## 8. Closing — 3:30–3:50
-
-**Voice:** “BiteOS gives a small food business the clarity of an enterprise operation: orders, payments, kitchen flow, stock control, and explainable intelligence in one system. Built for Dhaka. Ready to scale.”
-
-**Screen:** Return to the light POS home screen. Slowly zoom out to the device frame, then fade to a BitePOS wordmark.
+**Screen:** Open **Menu → Intelligence**. Sweep past WasteLess and End-of-day recap. Return to the POS home screen and slowly zoom out to the BitePOS wordmark.
 
 ## Voiceover prompt
 
-“Create a confident, warm English narration from this script. The speaker understands Bangladesh’s small restaurant workflow. Use ‘Rahim Bhai’ naturally where it adds authenticity. Keep the delivery grounded and practical, not like a generic technology advertisement.”
+“Create a confident, warm two-minute English narration from this script. The speaker understands Bangladesh’s small restaurant workflow. Use ‘Rahim Bhai’ naturally where it adds authenticity. Keep the tone grounded and practical.”
