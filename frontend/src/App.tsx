@@ -48,6 +48,7 @@ function App() {
   const [paymentStatus, setPaymentStatus] = useState<'ready' | 'waiting' | 'confirmed' | 'error'>('ready')
   const [paymentReference, setPaymentReference] = useState('')
   const [paidReceipt, setPaidReceipt] = useState<PaymentConfirmedEvent | null>(null)
+  const [isPrintingReceipt, setIsPrintingReceipt] = useState(false)
   const [auto86Message, setAuto86Message] = useState<string | null>(null)
   const [marginAlert, setMarginAlert] = useState<string | null>(null)
   const [morningBrief, setMorningBrief] = useState({ banner_text: 'Rain at 1 PM — prepare 20% more delivery portions.', weather_kind: 'rain' })
@@ -71,9 +72,13 @@ function App() {
 
       setPaymentStatus('confirmed')
       setPaidReceipt(event)
+      setIsPrintingReceipt(true)
       if ('speechSynthesis' in window) {
-        window.speechSynthesis.speak(new SpeechSynthesisUtterance(`${event.method}-e ${event.amount} taka porishodh kora hoyeche`))
+        const announcement = new SpeechSynthesisUtterance(`${event.method} payment received. ${event.amount} Bangladeshi taka paid successfully.`)
+        announcement.lang = 'en-US'
+        window.speechSynthesis.speak(announcement)
       }
+      window.setTimeout(() => setIsPrintingReceipt(false), 1800)
       window.setTimeout(clearCart, 900)
     }
     return () => socket.close()
@@ -123,6 +128,7 @@ function App() {
     setPaymentReference(`BITE${Date.now().toString().slice(-8)}`)
     setPaymentStatus('ready')
     setPaidReceipt(null)
+    setIsPrintingReceipt(false)
     setIsPaymentOpen(true)
   }
 
@@ -282,13 +288,16 @@ function App() {
                 <span className="grid mx-auto size-16 place-items-center rounded-full bg-emerald-500/20 text-3xl text-emerald-300">✓</span>
                 <p className="mt-4 text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">Payment confirmed</p>
                 <h2 className="mt-2 text-2xl font-bold">{currency.format(paidReceipt.amount)} received</h2>
-                <div className="mt-6 border-y-2 border-dashed border-stone-600 bg-stone-950 px-5 py-6 text-left font-mono text-xs text-stone-300 animate-[pulse_1s_ease-in-out_2]">
+                <div className={`mt-6 origin-top border-y-2 border-dashed border-slate-300 bg-white px-5 py-6 text-left font-mono text-xs text-slate-700 shadow-sm ${isPrintingReceipt ? 'animate-[receipt-feed_1.8s_ease-out]' : ''}`}>
+                  <div className={`-mx-5 -mt-6 mb-5 h-3 bg-slate-200 ${isPrintingReceipt ? 'animate-pulse' : ''}`} />
                   <p className="font-bold text-stone-50">BITEOS • THERMAL RECEIPT</p>
                   <p className="mt-3">{paidReceipt.method} / BanglaQR</p>
                   <p>Order {paidReceipt.order_id.slice(-6).toUpperCase()}</p>
                   <p>Ref {paidReceipt.reference}</p>
                   <p className="mt-4 border-t border-dashed border-stone-700 pt-3 text-sm font-bold text-stone-50">PAID {currency.format(paidReceipt.amount)}</p>
+                  <div className={`-mx-5 -mb-6 mt-5 h-3 bg-slate-200 ${isPrintingReceipt ? 'animate-pulse' : ''}`} />
                 </div>
+                <p className="mt-3 text-sm font-semibold text-teal-700">{isPrintingReceipt ? 'Printing receipt…' : 'Receipt printed successfully'}</p>
                 <button className="mt-6 min-h-12 w-full rounded-xl bg-stone-100 px-4 font-bold text-stone-950" onClick={() => setIsPaymentOpen(false)} type="button">New order</button>
               </div>
             ) : (

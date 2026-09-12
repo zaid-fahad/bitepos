@@ -36,7 +36,7 @@ export function KdsScreen() {
 
   const bump = (order: KdsOrder) => {
     void bumpKdsOrder(order.id).then(() => {
-      if ('speechSynthesis' in window) window.speechSynthesis.speak(new SpeechSynthesisUtterance(`${order.driver_name ?? 'Counter'} er order ready`))
+      if ('speechSynthesis' in window) { const announcement = new SpeechSynthesisUtterance(`Order for ${order.driver_name ?? 'counter collection'} is ready.`); announcement.lang = 'en-US'; window.speechSynthesis.speak(announcement) }
     }).catch((issue: unknown) => setError(issue instanceof Error ? issue.message : 'Unable to bump order.'))
   }
 

@@ -13,6 +13,12 @@ body {
 
 button { cursor: pointer; }
 
+@keyframes receipt-feed {
+  0% { opacity: 0; transform: translateY(-72px) scaleY(0.1); }
+  35% { opacity: 1; transform: translateY(-18px) scaleY(0.55); }
+  100% { opacity: 1; transform: translateY(0) scaleY(1); }
+}
+
 /* Legacy operational panels share the new light product surface until their
    individual workflows are redesigned. */
 .bg-stone-950, .bg-stone-900, .bg-stone-800, .bg-stone-700 { background-color: #ffffff !important; }
