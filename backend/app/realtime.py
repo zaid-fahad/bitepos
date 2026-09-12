@@ -1,0 +1,24 @@
+from fastapi import WebSocket
+
+
+class PaymentConnectionManager:
+    def __init__(self) -> None:
+        self._connections: list[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket) -> None:
+        await websocket.accept()
+        self._connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket) -> None:
+        if websocket in self._connections:
+            self._connections.remove(websocket)
+
+    async def broadcast(self, event: dict[str, object]) -> None:
+        for connection in self._connections.copy():
+            try:
+                await connection.send_json(event)
+            except RuntimeError:
+                self.disconnect(connection)
+
+
+payment_connections = PaymentConnectionManager()

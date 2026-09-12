@@ -12,3 +12,13 @@ export interface Dish {
 export interface CartItem extends Dish {
   quantity: number
 }
+
+export type PaymentMethod = 'bKash' | 'Nagad'
+
+export interface PaymentConfirmedEvent {
+  event: 'PAYMENT_CONFIRMED'
+  amount: number
+  method: PaymentMethod
+  order_id: string
+  reference: string
+}

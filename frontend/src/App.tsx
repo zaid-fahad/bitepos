@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
+import { QRCodeSVG } from 'qrcode.react'
 
 import { useCart } from './hooks/useCart'
-import { fetchDishes } from './services/api'
-import type { Dish, DishCategory } from './types/dish'
+import { fetchDishes, paymentSocketUrl, simulatePayment } from './services/api'
+import type { Dish, DishCategory, PaymentConfirmedEvent, PaymentMethod } from './types/dish'
 
 type CategoryTab = {
   label: string
@@ -23,13 +24,22 @@ const currency = new Intl.NumberFormat('en-BD', {
   maximumFractionDigits: 0,
 })
 
+function buildBanglaQrPayload(amount: number, reference: string) {
+  const amountText = amount.toFixed(2)
+  return `00020101021226340010BD.BANGLAQR0114BITEOS-DEMO-QR52045812530370454${amountText.length}${amountText}5802BD5914Dhanmondi POS6005Dhaka6212${reference.length}${reference}`
+}
+
 function App() {
   const [dishes, setDishes] = useState<Dish[]>([])
   const [activeCategory, setActiveCategory] = useState<CategoryTab['category']>('LOCAL_MEALS')
   const [discountPercent, setDiscountPercent] = useState(0)
   const [isPaymentOpen, setIsPaymentOpen] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('bKash')
+  const [paymentStatus, setPaymentStatus] = useState<'ready' | 'waiting' | 'confirmed' | 'error'>('ready')
+  const [paymentReference, setPaymentReference] = useState('')
+  const [paidReceipt, setPaidReceipt] = useState<PaymentConfirmedEvent | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
-  const { items, addDish, changeQuantity, removeDish, subtotal } = useCart()
+  const { items, addDish, changeQuantity, removeDish, clearCart, subtotal } = useCart()
 
   useEffect(() => {
     void fetchDishes()
@@ -39,6 +49,22 @@ function App() {
       })
   }, [])
 
+  useEffect(() => {
+    const socket = new WebSocket(paymentSocketUrl())
+    socket.onmessage = (message) => {
+      const event = JSON.parse(message.data) as PaymentConfirmedEvent
+      if (event.event !== 'PAYMENT_CONFIRMED' || event.reference !== paymentReference) return
+
+      setPaymentStatus('confirmed')
+      setPaidReceipt(event)
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.speak(new SpeechSynthesisUtterance(`${event.method}-e ${event.amount} taka porishodh kora hoyeche`))
+      }
+      window.setTimeout(clearCart, 900)
+    }
+    return () => socket.close()
+  }, [clearCart, paymentReference])
+
   const visibleDishes = useMemo(
     () => dishes.filter((dish) => dish.category === activeCategory),
     [activeCategory, dishes],
@@ -46,6 +72,20 @@ function App() {
   const discount = subtotal * (discountPercent / 100)
   const vat = (subtotal - discount) * 0.15
   const grandTotal = subtotal - discount + vat
+  const qrPayload = buildBanglaQrPayload(grandTotal, paymentReference || 'BITEOSDEMO')
+
+  const openPayment = () => {
+    setPaymentReference(`BITE${Date.now().toString().slice(-8)}`)
+    setPaymentStatus('ready')
+    setPaidReceipt(null)
+    setIsPaymentOpen(true)
+  }
+
+  const startPaymentSimulation = () => {
+    setPaymentStatus('waiting')
+    void simulatePayment({ amount: grandTotal, items, method: paymentMethod, reference: paymentReference })
+      .catch(() => setPaymentStatus('error'))
+  }
 
   return (
     <main className="min-h-screen bg-stone-950 p-0 text-stone-50 sm:p-6">
@@ -169,7 +209,7 @@ function App() {
             <button
               className="mt-5 min-h-14 w-full rounded-2xl bg-orange-500 px-5 text-base font-extrabold text-stone-950 transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-40"
               disabled={items.length === 0}
-              onClick={() => setIsPaymentOpen(true)}
+              onClick={openPayment}
               type="button"
             >
               Charge {currency.format(grandTotal)}
@@ -185,10 +225,41 @@ function App() {
       {isPaymentOpen && (
         <div className="fixed inset-0 z-10 grid place-items-end bg-black/70 p-4 sm:place-items-center" role="dialog" aria-modal="true" aria-label="BanglaQR payment">
           <section className="w-full max-w-md rounded-3xl border border-orange-400/30 bg-stone-900 p-6 shadow-2xl">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange-400">BanglaQR</p>
-            <h2 className="mt-2 text-2xl font-bold">Ready to charge {currency.format(grandTotal)}</h2>
-            <p className="mt-3 text-sm leading-6 text-stone-300">The dynamic BanglaQR, payment confirmation, audio chime, and receipt flow are delivered in Issue #4.</p>
-            <button className="mt-6 min-h-12 w-full rounded-xl bg-stone-100 px-4 font-bold text-stone-950" onClick={() => setIsPaymentOpen(false)} type="button">Back to order</button>
+            {paymentStatus === 'confirmed' && paidReceipt ? (
+              <div className="text-center">
+                <span className="grid mx-auto size-16 place-items-center rounded-full bg-emerald-500/20 text-3xl text-emerald-300">✓</span>
+                <p className="mt-4 text-xs font-bold uppercase tracking-[0.2em] text-emerald-300">Payment confirmed</p>
+                <h2 className="mt-2 text-2xl font-bold">{currency.format(paidReceipt.amount)} received</h2>
+                <div className="mt-6 border-y-2 border-dashed border-stone-600 bg-stone-950 px-5 py-6 text-left font-mono text-xs text-stone-300 animate-[pulse_1s_ease-in-out_2]">
+                  <p className="font-bold text-stone-50">BITEOS • THERMAL RECEIPT</p>
+                  <p className="mt-3">{paidReceipt.method} / BanglaQR</p>
+                  <p>Order {paidReceipt.order_id.slice(-6).toUpperCase()}</p>
+                  <p>Ref {paidReceipt.reference}</p>
+                  <p className="mt-4 border-t border-dashed border-stone-700 pt-3 text-sm font-bold text-stone-50">PAID {currency.format(paidReceipt.amount)}</p>
+                </div>
+                <button className="mt-6 min-h-12 w-full rounded-xl bg-stone-100 px-4 font-bold text-stone-950" onClick={() => setIsPaymentOpen(false)} type="button">New order</button>
+              </div>
+            ) : (
+              <>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange-400">BanglaQR • Demo payment</p>
+                <h2 className="mt-2 text-2xl font-bold">Pay {currency.format(grandTotal)}</h2>
+                <div className="mx-auto mt-6 grid aspect-square w-56 place-items-center rounded-3xl bg-white p-4">
+                  <QRCodeSVG aria-label={`BanglaQR for ${currency.format(grandTotal)}`} bgColor="#ffffff" fgColor="#171717" level="M" size={192} value={qrPayload} />
+                </div>
+                <p className="mt-4 text-center text-xs text-stone-400">Dynamic EMVCo-style demo payload • Ref {paymentReference}</p>
+                <div className="mt-5 grid grid-cols-2 gap-2" aria-label="Payment method">
+                  {(['bKash', 'Nagad'] as PaymentMethod[]).map((method) => (
+                    <button className={`min-h-12 rounded-xl font-bold ${paymentMethod === method ? 'bg-orange-500 text-stone-950' : 'border border-stone-700 text-stone-300'}`} key={method} onClick={() => setPaymentMethod(method)} type="button">{method}</button>
+                  ))}
+                </div>
+                {paymentStatus === 'waiting' ? <p className="mt-4 text-center text-sm font-semibold text-amber-200">Waiting for {paymentMethod} confirmation…</p> : null}
+                {paymentStatus === 'error' ? <p className="mt-4 text-center text-sm font-semibold text-red-200">Could not start payment. Try again.</p> : null}
+                <button className="mt-5 min-h-14 w-full rounded-2xl bg-orange-500 px-5 text-base font-extrabold text-stone-950 disabled:opacity-50" disabled={paymentStatus === 'waiting'} onClick={startPaymentSimulation} type="button">
+                  {paymentStatus === 'waiting' ? 'Confirming in 3 seconds…' : `Simulate ${paymentMethod} payment`}
+                </button>
+                <button className="mt-3 min-h-12 w-full rounded-xl bg-stone-800 px-4 font-bold text-stone-200" disabled={paymentStatus === 'waiting'} onClick={() => setIsPaymentOpen(false)} type="button">Back to order</button>
+              </>
+            )}
           </section>
         </div>
       )}

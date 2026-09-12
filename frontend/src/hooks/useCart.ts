@@ -34,10 +34,12 @@ export function useCart() {
     setItems((currentItems) => currentItems.filter((item) => item.id !== dishId))
   }
 
+  const clearCart = () => setItems([])
+
   const subtotal = useMemo(
     () => items.reduce((total, item) => total + item.price * item.quantity, 0),
     [items],
   )
 
-  return { items, addDish, changeQuantity, removeDish, subtotal }
+  return { items, addDish, changeQuantity, removeDish, clearCart, subtotal }
 }
