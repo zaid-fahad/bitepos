@@ -7,3 +7,107 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum DishCategory {
+  LOCAL_MEALS
+  FAST_FOOD
+  BAKERY
+  DRINKS
+}
+
+enum IngredientUnit {
+  KG
+  L
+  PCS
+}
+
+enum OrderChannel {
+  IN_STORE
+  FOODPANDA
+  PATHAO
+  FOODI
+}
+
+enum OrderStatus {
+  PENDING
+  PREPARING
+  READY
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  BANGLA_QR
+}
+
+model Dish {
+  id               String       @id @default(cuid())
+  name             String       @unique
+  category         DishCategory
+  price            Decimal      @db.Decimal(12, 2)
+  stockCount       Int          @default(0)
+  shelfLifeHours   Int?
+  orderItems       OrderItem[]
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+}
+
+model Ingredient {
+  id          String          @id @default(cuid())
+  name        String          @unique
+  unit        IngredientUnit
+  stockInLogs StockInLog[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+model StockInLog {
+  id           String     @id @default(cuid())
+  ingredientId String
+  quantity     Decimal    @db.Decimal(12, 3)
+  totalCostBdt Decimal    @db.Decimal(12, 2)
+  unitCostBdt  Decimal    @db.Decimal(12, 2)
+  loggedAt     DateTime   @default(now())
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict)
+
+  @@index([ingredientId, loggedAt])
+}
+
+model Order {
+  id               String        @id @default(cuid())
+  channel          OrderChannel
+  status           OrderStatus   @default(PENDING)
+  grandTotal       Decimal       @db.Decimal(12, 2)
+  paymentMethod    PaymentMethod
+  driverEtaMinutes Int?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  items            OrderItem[]
+
+  @@index([channel, status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  dishId    String
+  quantity  Int
+  unitPrice Decimal @db.Decimal(12, 2)
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  dish      Dish    @relation(fields: [dishId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([dishId])
+}
+
+model DailyFinancialSummary {
+  id                     String   @id @default(cuid())
+  date                   DateTime @unique @db.Date
+  totalCash              Decimal  @db.Decimal(12, 2)
+  totalMfs               Decimal  @db.Decimal(12, 2)
+  totalDeliveryPayoutEst Decimal  @db.Decimal(12, 2)
+  netProfitEst           Decimal  @db.Decimal(12, 2)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+}

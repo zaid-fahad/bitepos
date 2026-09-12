@@ -25,13 +25,17 @@ The health endpoint returns:
 {"status":"ok"}
 ```
 
-## Database schema
+## Database schema and seed data
 
-The initial Prisma schema is in `backend/prisma/schema.prisma`. Once migrations are introduced, run Prisma commands inside the backend container, for example:
+The Prisma schema is in `backend/prisma/schema.prisma`. Create a development migration and generate the client inside the backend container:
 
 ```bash
+docker compose exec backend prisma migrate dev --name init_core_models
 docker compose exec backend prisma generate
+docker compose exec backend python prisma/seed.py
 ```
+
+The seed script is idempotent and creates Chicken Tehari, Beef Kacchi, Paratha, Pastry, and starter ingredients.
 
 ## Stop the stack
 
@@ -40,4 +44,3 @@ docker compose down
 ```
 
 Use `docker compose down -v` only when you intentionally want to remove the local PostgreSQL data volume.
-
