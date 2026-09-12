@@ -4,11 +4,13 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import db
+from app.routers.ai import router as ai_router
 from app.routers.dishes import router as dishes_router
 from app.routers.payments import router as payments_router
 from app.routers.orders import router as orders_router
 from app.routers.stock import router as stock_router
-from app.realtime import order_connections, payment_connections, stock_connections
+from app.realtime import order_connections, payment_connections, stock_connections, ai_connections
+
 
 
 @asynccontextmanager
@@ -34,6 +36,7 @@ app.include_router(dishes_router)
 app.include_router(payments_router)
 app.include_router(orders_router)
 app.include_router(stock_router)
+app.include_router(ai_router)
 
 
 @app.websocket("/ws/payments")
@@ -64,6 +67,16 @@ async def stock_events(websocket: WebSocket) -> None:
             await websocket.receive_text()
     except WebSocketDisconnect:
         stock_connections.disconnect(websocket)
+
+
+@app.websocket("/ws/ai")
+async def ai_events(websocket: WebSocket) -> None:
+    await ai_connections.connect(websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        ai_connections.disconnect(websocket)
 
 
 @app.get("/health")

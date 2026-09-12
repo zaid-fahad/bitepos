@@ -24,3 +24,4 @@ class ConnectionManager:
 payment_connections = ConnectionManager()
 order_connections = ConnectionManager()
 stock_connections = ConnectionManager()
+ai_connections = ConnectionManager()

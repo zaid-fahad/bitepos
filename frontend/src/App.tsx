@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 
+import { AICopilotTab } from './components/AICopilotTab'
 import { KdsScreen } from './components/KdsScreen'
+import { StockInScreen } from './components/StockInScreen'
 import { useCart } from './hooks/useCart'
 import { fetchDishes, paymentSocketUrl, simulatePayment, stockSocketUrl } from './services/api'
 import type { Dish, DishCategory, PaymentConfirmedEvent, PaymentMethod } from './types/dish'
+
 
 type CategoryTab = {
   label: string
@@ -33,7 +36,7 @@ function buildBanglaQrPayload(amount: number, reference: string) {
 function App() {
   const [dishes, setDishes] = useState<Dish[]>([])
   const [activeCategory, setActiveCategory] = useState<CategoryTab['category']>('LOCAL_MEALS')
-  const [activeView, setActiveView] = useState<'POS' | 'KDS'>('POS')
+  const [activeView, setActiveView] = useState<'POS' | 'KDS' | 'STOCK' | 'AI'>('POS')
   const [discountPercent, setDiscountPercent] = useState(0)
   const [isPaymentOpen, setIsPaymentOpen] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('bKash')
@@ -41,8 +44,10 @@ function App() {
   const [paymentReference, setPaymentReference] = useState('')
   const [paidReceipt, setPaidReceipt] = useState<PaymentConfirmedEvent | null>(null)
   const [auto86Message, setAuto86Message] = useState<string | null>(null)
+  const [marginAlert, setMarginAlert] = useState<string | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const { items, addDish, changeQuantity, removeDish, clearCart, subtotal } = useCart()
+
 
   useEffect(() => {
     void fetchDishes()
@@ -79,6 +84,24 @@ function App() {
     }
     return () => socket.close()
   }, [])
+
+  useEffect(() => {
+    const aiUrl = stockSocketUrl().replace('/ws/stock', '/ws/ai')
+    const socket = new WebSocket(aiUrl)
+    socket.onmessage = (message) => {
+      const event = JSON.parse(message.data) as { event: string; ingredient_name?: string; margin_warning?: boolean }
+      if (event.event === 'MARGIN_ALERT' && event.margin_warning) {
+        setMarginAlert(`⚠️ Margin drop on ${event.ingredient_name ?? 'ingredient'} — check Stock tab`)
+        window.setTimeout(() => setMarginAlert(null), 8000)
+      }
+      if (event.event === 'WASTELESS_ALERT') {
+        setMarginAlert('💡 WasteLess deals ready — check AI tab')
+        window.setTimeout(() => setMarginAlert(null), 8000)
+      }
+    }
+    return () => socket.close()
+  }, [])
+
 
   const visibleDishes = useMemo(
     () => dishes.filter((dish) => dish.category === activeCategory),
@@ -124,9 +147,26 @@ function App() {
           <span className="font-bold">AI prep alert:</span> Rain at 1 PM — prepare 20% more delivery portions.
         </aside>
 
-        <div className="mx-4 mb-4 grid grid-cols-2 rounded-xl bg-stone-800 p-1" aria-label="POS view switcher"><button className={`min-h-11 rounded-lg text-sm font-bold ${activeView === 'POS' ? 'bg-orange-500 text-stone-950' : 'text-stone-300'}`} onClick={() => setActiveView('POS')} type="button">POS</button><button className={`min-h-11 rounded-lg text-sm font-bold ${activeView === 'KDS' ? 'bg-orange-500 text-stone-950' : 'text-stone-300'}`} onClick={() => setActiveView('KDS')} type="button">Kitchen KDS</button></div>
+        {marginAlert ? (
+          <aside className="mx-4 mb-2 rounded-xl border border-amber-400/40 bg-amber-400/10 px-4 py-2 text-xs font-bold text-amber-200" role="status">
+            {marginAlert}
+          </aside>
+        ) : null}
 
-        {activeView === 'POS' ? <><nav className="flex gap-2 overflow-x-auto px-4 pb-4" aria-label="Menu categories">
+        <div className="mx-4 mb-4 grid grid-cols-4 rounded-xl bg-stone-800 p-1" aria-label="POS view switcher">
+          {(['POS', 'KDS', 'STOCK', 'AI'] as const).map((view) => (
+            <button
+              className={`min-h-11 rounded-lg text-xs font-bold ${activeView === view ? 'bg-orange-500 text-stone-950' : 'text-stone-300'}`}
+              key={view}
+              onClick={() => setActiveView(view)}
+              type="button"
+            >
+              {view === 'POS' ? '🛒 POS' : view === 'KDS' ? '🍳 KDS' : view === 'STOCK' ? '📦 Stock' : '🤖 AI'}
+            </button>
+          ))}
+        </div>
+
+        {activeView === 'POS' ? (<>
           {categoryTabs.map((tab) => (
             <button
               className={`min-h-12 shrink-0 rounded-xl px-4 text-sm font-bold transition ${
@@ -232,7 +272,8 @@ function App() {
               Charge {currency.format(grandTotal)}
             </button>
           </section>
-        </div></> : <KdsScreen />}
+        </div></> : activeView === 'KDS' ? <KdsScreen /> : activeView === 'STOCK' ? <StockInScreen /> : <AICopilotTab />}
+
 
         <footer className="h-12 border-t-4 border-dashed border-stone-700 bg-stone-950 text-center text-xs font-semibold tracking-[0.25em] text-stone-500">
           THERMAL PRINTER SLOT
