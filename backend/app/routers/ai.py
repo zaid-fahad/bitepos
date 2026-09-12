@@ -15,10 +15,18 @@ from pydantic import BaseModel
 from app.ai.prompts.eod_recap import run_eod_recap
 from app.ai.prompts.margin_defense import MarginDefenseResponse, run_margin_defense
 from app.ai.prompts.wasteless import WastelessResponse, run_wasteless
+from app.ai.prompts.morning_forecast import MorningBrief, run_morning_forecast
 from app.database import db
 from app.realtime import ai_connections
 
 router = APIRouter(tags=["ai"])
+
+
+@router.post("/api/ai/morning-brief", response_model=MorningBrief)
+async def morning_brief() -> MorningBrief:
+    brief = await run_morning_forecast()
+    await ai_connections.broadcast({"event": "MORNING_BRIEF", **brief.model_dump()})
+    return brief
 
 
 # ===========================================================================

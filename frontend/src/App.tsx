@@ -45,6 +45,7 @@ function App() {
   const [paidReceipt, setPaidReceipt] = useState<PaymentConfirmedEvent | null>(null)
   const [auto86Message, setAuto86Message] = useState<string | null>(null)
   const [marginAlert, setMarginAlert] = useState<string | null>(null)
+  const [morningBrief, setMorningBrief] = useState({ banner_text: 'Rain at 1 PM — prepare 20% more delivery portions.', weather_kind: 'rain' })
   const [loadError, setLoadError] = useState<string | null>(null)
   const { items, addDish, changeQuantity, removeDish, clearCart, subtotal } = useCart()
 
@@ -89,7 +90,7 @@ function App() {
     const aiUrl = stockSocketUrl().replace('/ws/stock', '/ws/ai')
     const socket = new WebSocket(aiUrl)
     socket.onmessage = (message) => {
-      const event = JSON.parse(message.data) as { event: string; ingredient_name?: string; margin_warning?: boolean }
+      const event = JSON.parse(message.data) as { event: string; ingredient_name?: string; margin_warning?: boolean; banner_text?: string; weather_kind?: 'rain' | 'sun' | 'storm' }
       if (event.event === 'MARGIN_ALERT' && event.margin_warning) {
         setMarginAlert(`⚠️ Margin drop on ${event.ingredient_name ?? 'ingredient'} — check Stock tab`)
         window.setTimeout(() => setMarginAlert(null), 8000)
@@ -98,6 +99,7 @@ function App() {
         setMarginAlert('💡 WasteLess deals ready — check AI tab')
         window.setTimeout(() => setMarginAlert(null), 8000)
       }
+      if (event.event === 'MORNING_BRIEF' && event.banner_text && event.weather_kind) setMorningBrief({ banner_text: event.banner_text, weather_kind: event.weather_kind })
     }
     return () => socket.close()
   }, [])
@@ -144,7 +146,7 @@ function App() {
         </header>
 
         <aside className="m-4 rounded-2xl border border-amber-400/25 bg-amber-400/10 px-4 py-3 text-sm leading-5 text-amber-100">
-          <span className="font-bold">AI prep alert:</span> Rain at 1 PM — prepare 20% more delivery portions.
+          <span className="font-bold">{morningBrief.weather_kind === 'storm' ? '⚡' : morningBrief.weather_kind === 'sun' ? '☀️' : '🌧️'} AI prep alert:</span> {morningBrief.banner_text}
         </aside>
 
         {marginAlert ? (
@@ -166,7 +168,7 @@ function App() {
           ))}
         </div>
 
-        {activeView === 'POS' ? (<>
+        {activeView === 'POS' ? (<><nav className="flex gap-2 overflow-x-auto px-4 pb-4" aria-label="Menu categories">
           {categoryTabs.map((tab) => (
             <button
               className={`min-h-12 shrink-0 rounded-xl px-4 text-sm font-bold transition ${
@@ -272,7 +274,7 @@ function App() {
               Charge {currency.format(grandTotal)}
             </button>
           </section>
-        </div></> : activeView === 'KDS' ? <KdsScreen /> : activeView === 'STOCK' ? <StockInScreen /> : <AICopilotTab />}
+        </div></>) : activeView === 'KDS' ? <KdsScreen /> : activeView === 'STOCK' ? <StockInScreen /> : <AICopilotTab />}
 
 
         <footer className="h-12 border-t-4 border-dashed border-stone-700 bg-stone-950 text-center text-xs font-semibold tracking-[0.25em] text-stone-500">
