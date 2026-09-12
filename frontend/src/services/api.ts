@@ -59,3 +59,5 @@ export async function bumpKdsOrder(orderId: string): Promise<void> {
 }
 
 export function orderSocketUrl(): string { return apiBaseUrl.replace(/^http/, 'ws') + '/ws/orders' }
+
+export function stockSocketUrl(): string { return apiBaseUrl.replace(/^http/, 'ws') + '/ws/stock' }

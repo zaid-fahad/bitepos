@@ -3,7 +3,7 @@ import { QRCodeSVG } from 'qrcode.react'
 
 import { KdsScreen } from './components/KdsScreen'
 import { useCart } from './hooks/useCart'
-import { fetchDishes, paymentSocketUrl, simulatePayment } from './services/api'
+import { fetchDishes, paymentSocketUrl, simulatePayment, stockSocketUrl } from './services/api'
 import type { Dish, DishCategory, PaymentConfirmedEvent, PaymentMethod } from './types/dish'
 
 type CategoryTab = {
@@ -40,6 +40,7 @@ function App() {
   const [paymentStatus, setPaymentStatus] = useState<'ready' | 'waiting' | 'confirmed' | 'error'>('ready')
   const [paymentReference, setPaymentReference] = useState('')
   const [paidReceipt, setPaidReceipt] = useState<PaymentConfirmedEvent | null>(null)
+  const [auto86Message, setAuto86Message] = useState<string | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const { items, addDish, changeQuantity, removeDish, clearCart, subtotal } = useCart()
 
@@ -66,6 +67,18 @@ function App() {
     }
     return () => socket.close()
   }, [clearCart, paymentReference])
+
+  useEffect(() => {
+    const socket = new WebSocket(stockSocketUrl())
+    socket.onmessage = (message) => {
+      const event = JSON.parse(message.data) as { event: string; dish_name: string; platforms: string[] }
+      if (event.event !== 'ITEM_AUTO86') return
+      setAuto86Message(`⚠️ ${event.dish_name} sold out — auto-paused on ${event.platforms.join(', ')}`)
+      window.setTimeout(() => setAuto86Message(null), 6000)
+      void fetchDishes().then(setDishes)
+    }
+    return () => socket.close()
+  }, [])
 
   const visibleDishes = useMemo(
     () => dishes.filter((dish) => dish.category === activeCategory),
@@ -267,6 +280,7 @@ function App() {
           </section>
         </div>
       )}
+      {auto86Message ? <div className="fixed bottom-5 left-1/2 z-20 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl border border-red-400/40 bg-stone-900 p-4 text-sm font-bold text-red-100 shadow-2xl" role="status">{auto86Message}</div> : null}
     </main>
   )
 }
