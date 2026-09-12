@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 
 import { AICopilotTab } from './components/AICopilotTab'
+import { ActiveOrders } from './components/ActiveOrders'
 import { KdsScreen } from './components/KdsScreen'
 import { StockInScreen } from './components/StockInScreen'
 import { useCart } from './hooks/useCart'
@@ -36,7 +37,8 @@ function buildBanglaQrPayload(amount: number, reference: string) {
 function App() {
   const [dishes, setDishes] = useState<Dish[]>([])
   const [activeCategory, setActiveCategory] = useState<CategoryTab['category']>('LOCAL_MEALS')
-  const [activeView, setActiveView] = useState<'POS' | 'KDS' | 'STOCK' | 'AI'>('POS')
+  const [activeView, setActiveView] = useState<'POS' | 'ORDERS' | 'STOCK' | 'AI'>('POS')
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const [discountPercent, setDiscountPercent] = useState(0)
   const [isPaymentOpen, setIsPaymentOpen] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('bKash')
@@ -128,9 +130,9 @@ function App() {
   }
 
   return (
-    <main className="min-h-screen bg-stone-950 p-0 text-stone-50 sm:p-6">
-      <section className="mx-auto flex min-h-[1280px] w-full max-w-[720px] flex-col overflow-hidden bg-stone-900 shadow-2xl sm:rounded-[2.5rem] sm:border sm:border-orange-500/25">
-        <header className="border-b border-stone-700/80 bg-stone-950 px-5 pb-4 pt-3">
+    <main className="min-h-screen bg-slate-100 p-0 text-slate-900 sm:p-6">
+      <section className="mx-auto flex min-h-[1280px] w-full max-w-[720px] flex-col overflow-hidden bg-white shadow-xl sm:rounded-[2rem] sm:border sm:border-slate-200">
+        <header className="border-b border-slate-200 bg-white px-5 pb-4 pt-3">
           <div className="flex items-center justify-between text-xs text-stone-400">
             <span>9:41</span>
             <div className="h-1.5 w-16 rounded-full bg-stone-700" aria-label="Speaker grille" />
@@ -138,15 +140,15 @@ function App() {
           </div>
           <div className="mt-5 flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange-400">BiteOS POS</p>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-700">BitePOS</p>
               <h1 className="mt-1 text-xl font-bold">Dhanmondi Street Kitchen</h1>
             </div>
-            <span className="rounded-full bg-emerald-500/15 px-3 py-2 text-xs font-bold text-emerald-300">● Online</span>
+            <button className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold" onClick={() => setDrawerOpen(true)} type="button">Menu</button>
           </div>
         </header>
 
-        <aside className="m-4 rounded-2xl border border-amber-400/25 bg-amber-400/10 px-4 py-3 text-sm leading-5 text-amber-100">
-          <span className="font-bold">{morningBrief.weather_kind === 'storm' ? '⚡' : morningBrief.weather_kind === 'sun' ? '☀️' : '🌧️'} AI prep alert:</span> {morningBrief.banner_text}
+        <aside className="m-4 rounded-2xl border border-teal-100 bg-teal-50 px-4 py-3 text-sm leading-5 text-teal-900">
+          <span className="font-bold">Prep recommendation:</span> {morningBrief.banner_text}
         </aside>
 
         {marginAlert ? (
@@ -154,19 +156,6 @@ function App() {
             {marginAlert}
           </aside>
         ) : null}
-
-        <div className="mx-4 mb-4 grid grid-cols-4 rounded-xl bg-stone-800 p-1" aria-label="POS view switcher">
-          {(['POS', 'KDS', 'STOCK', 'AI'] as const).map((view) => (
-            <button
-              className={`min-h-11 rounded-lg text-xs font-bold ${activeView === view ? 'bg-orange-500 text-stone-950' : 'text-stone-300'}`}
-              key={view}
-              onClick={() => setActiveView(view)}
-              type="button"
-            >
-              {view === 'POS' ? '🛒 POS' : view === 'KDS' ? '🍳 KDS' : view === 'STOCK' ? '📦 Stock' : '🤖 AI'}
-            </button>
-          ))}
-        </div>
 
         {activeView === 'POS' ? (<><nav className="flex gap-2 overflow-x-auto px-4 pb-4" aria-label="Menu categories">
           {categoryTabs.map((tab) => (
@@ -274,7 +263,7 @@ function App() {
               Charge {currency.format(grandTotal)}
             </button>
           </section>
-        </div></>) : activeView === 'KDS' ? <KdsScreen /> : activeView === 'STOCK' ? <StockInScreen /> : <AICopilotTab />}
+        </div></>) : activeView === 'ORDERS' ? <ActiveOrders /> : activeView === 'STOCK' ? <StockInScreen /> : <AICopilotTab />}
 
 
         <footer className="h-12 border-t-4 border-dashed border-stone-700 bg-stone-950 text-center text-xs font-semibold tracking-[0.25em] text-stone-500">
@@ -324,6 +313,7 @@ function App() {
         </div>
       )}
       {auto86Message ? <div className="fixed bottom-5 left-1/2 z-20 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl border border-red-400/40 bg-stone-900 p-4 text-sm font-bold text-red-100 shadow-2xl" role="status">{auto86Message}</div> : null}
+      {drawerOpen ? <div className="fixed inset-0 z-30 bg-slate-950/30" onClick={() => setDrawerOpen(false)}><aside className="h-full w-72 bg-white p-5 shadow-2xl" onClick={(event) => event.stopPropagation()}><p className="text-sm font-bold tracking-wide text-teal-700">BITEPOS</p><h2 className="mt-1 text-xl font-bold">Workspace</h2><nav className="mt-8 space-y-2">{([{ label: 'Point of sale', view: 'POS' }, { label: 'Active orders', view: 'ORDERS' }, { label: 'Inventory', view: 'STOCK' }, { label: 'Intelligence', view: 'AI' }] as const).map((item) => <button className={`block w-full rounded-xl px-4 py-3 text-left font-semibold ${activeView === item.view ? 'bg-teal-50 text-teal-800' : 'text-slate-700 hover:bg-slate-50'}`} key={item.view} onClick={() => { setActiveView(item.view); setDrawerOpen(false) }} type="button">{item.label}</button>)}<a className="mt-4 block rounded-xl border border-slate-200 px-4 py-3 font-semibold text-slate-700" href="/kds" target="_blank">Open kitchen display</a></nav></aside></div> : null}
     </main>
   )
 }
