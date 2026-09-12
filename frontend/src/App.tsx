@@ -275,9 +275,6 @@ function App() {
         </div></>) : activeView === 'STOCK' ? <StockInScreen /> : activeView === 'AVAILABILITY' ? <ItemAvailability /> : <><XaiPanel /><AICopilotTab /></>}
 
 
-        <footer className="h-12 border-t-4 border-dashed border-stone-700 bg-stone-950 text-center text-xs font-semibold tracking-[0.25em] text-stone-500">
-          THERMAL PRINTER SLOT
-        </footer>
       </section>
 
       {isPaymentOpen && (
@@ -302,14 +299,11 @@ function App() {
               </div>
             ) : (
               <>
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange-400">BanglaQR • Demo payment</p>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange-400">{paymentMethod === 'Cash' ? 'Cash • Counter payment' : 'BanglaQR • Demo payment'}</p>
                 <h2 className="mt-2 text-2xl font-bold">Pay {currency.format(grandTotal)}</h2>
-                <div className="mx-auto mt-6 grid aspect-square w-56 place-items-center rounded-3xl bg-white p-4">
-                  <QRCodeSVG aria-label={`BanglaQR for ${currency.format(grandTotal)}`} bgColor="#ffffff" fgColor="#171717" level="M" size={192} value={qrPayload} />
-                </div>
-                <p className="mt-4 text-center text-xs text-stone-400">Dynamic EMVCo-style demo payload • Ref {paymentReference}</p>
+                {paymentMethod === 'Cash' ? <div className="mx-auto mt-6 grid aspect-square w-56 place-items-center rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm font-semibold text-slate-600">Accept cash at the counter, then confirm payment.</div> : <><div className="mx-auto mt-6 grid aspect-square w-56 place-items-center rounded-3xl bg-white p-4"><QRCodeSVG aria-label={`BanglaQR for ${currency.format(grandTotal)}`} bgColor="#ffffff" fgColor="#171717" level="M" size={192} value={qrPayload} /></div><p className="mt-4 text-center text-xs text-stone-400">Dynamic EMVCo-style demo payload • Ref {paymentReference}</p></>}
                 <div className="mt-5 grid grid-cols-2 gap-2" aria-label="Payment method">
-                  {(['bKash', 'Nagad'] as PaymentMethod[]).map((method) => (
+                  {(['bKash', 'Nagad', 'Cash'] as PaymentMethod[]).map((method) => (
                     <button className={`min-h-12 rounded-xl font-bold ${paymentMethod === method ? 'bg-orange-500 text-stone-950' : 'border border-stone-700 text-stone-300'}`} key={method} onClick={() => setPaymentMethod(method)} type="button">{method}</button>
                   ))}
                 </div>

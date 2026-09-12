@@ -16,7 +16,7 @@ async def confirm_payment(payment: PaymentSimulationRequest) -> None:
             "channel": "IN_STORE",
             "status": "COMPLETED",
             "grandTotal": payment.amount,
-            "paymentMethod": "BANGLA_QR",
+            "paymentMethod": "CASH" if payment.method == "Cash" else "BANGLA_QR",
             "items": {
                 "create": [
                     {

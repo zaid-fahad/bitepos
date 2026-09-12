@@ -13,7 +13,7 @@ export interface CartItem extends Dish {
   quantity: number
 }
 
-export type PaymentMethod = 'bKash' | 'Nagad'
+export type PaymentMethod = 'bKash' | 'Nagad' | 'Cash'
 
 export interface PaymentConfirmedEvent {
   event: 'PAYMENT_CONFIRMED'

@@ -13,7 +13,7 @@ class PaymentItem(BaseModel):
 class PaymentSimulationRequest(BaseModel):
     amount: Decimal = Field(gt=0)
     items: list[PaymentItem] = Field(min_length=1)
-    method: Literal["bKash", "Nagad"] = "bKash"
+    method: Literal["bKash", "Nagad", "Cash"] = "bKash"
     reference: str = Field(min_length=1)
 
 
