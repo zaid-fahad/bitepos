@@ -3,6 +3,8 @@ import { QRCodeSVG } from 'qrcode.react'
 
 import { AICopilotTab } from './components/AICopilotTab'
 import { ActiveOrders } from './components/ActiveOrders'
+import { ItemAvailability } from './components/ItemAvailability'
+import { XaiPanel } from './components/XaiPanel'
 import { KdsScreen } from './components/KdsScreen'
 import { StockInScreen } from './components/StockInScreen'
 import { useCart } from './hooks/useCart'
@@ -37,7 +39,7 @@ function buildBanglaQrPayload(amount: number, reference: string) {
 function App() {
   const [dishes, setDishes] = useState<Dish[]>([])
   const [activeCategory, setActiveCategory] = useState<CategoryTab['category']>('LOCAL_MEALS')
-  const [activeView, setActiveView] = useState<'POS' | 'STOCK' | 'AI'>('POS')
+  const [activeView, setActiveView] = useState<'POS' | 'STOCK' | 'AI' | 'AVAILABILITY'>('POS')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [ordersOpen, setOrdersOpen] = useState(false)
   const [discountPercent, setDiscountPercent] = useState(0)
@@ -264,7 +266,7 @@ function App() {
               Charge {currency.format(grandTotal)}
             </button>
           </section>
-        </div></>) : activeView === 'STOCK' ? <StockInScreen /> : <AICopilotTab />}
+        </div></>) : activeView === 'STOCK' ? <StockInScreen /> : activeView === 'AVAILABILITY' ? <ItemAvailability /> : <><XaiPanel /><AICopilotTab /></>}
 
 
         <footer className="h-12 border-t-4 border-dashed border-stone-700 bg-stone-950 text-center text-xs font-semibold tracking-[0.25em] text-stone-500">
@@ -316,7 +318,7 @@ function App() {
       {activeView === 'POS' ? <button className="fixed bottom-6 right-6 z-20 grid size-14 place-items-center rounded-full bg-teal-600 text-xl font-bold text-white shadow-lg" aria-label="Open active orders" onClick={() => setOrdersOpen(true)} type="button">≡</button> : null}
       {auto86Message ? <div className="fixed bottom-5 left-1/2 z-20 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl border border-red-200 bg-white p-4 text-sm font-bold text-red-700 shadow-2xl" role="status">{auto86Message}</div> : null}
       {ordersOpen ? <div className="fixed inset-0 z-30 flex items-end bg-slate-950/30" onClick={() => setOrdersOpen(false)}><section className="max-h-[78vh] w-full overflow-y-auto rounded-t-[2rem] bg-white pb-8 pt-3 shadow-2xl" onClick={(event) => event.stopPropagation()} role="dialog" aria-label="Active orders"><div className="mx-auto mb-5 h-1.5 w-12 rounded-full bg-slate-200"/><div className="flex items-center justify-between px-5"><p className="text-sm font-semibold text-teal-700">ORDER MANAGEMENT</p><button className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-600" onClick={() => setOrdersOpen(false)} type="button">Close</button></div><ActiveOrders /></section></div> : null}
-      {drawerOpen ? <div className="fixed inset-0 z-30 bg-slate-950/30" onClick={() => setDrawerOpen(false)}><aside className="h-full w-72 bg-white p-5 shadow-2xl" onClick={(event) => event.stopPropagation()}><p className="text-sm font-bold tracking-wide text-teal-700">BITEPOS</p><h2 className="mt-1 text-xl font-bold">Workspace</h2><nav className="mt-8 space-y-2">{([{ label: 'Point of sale', view: 'POS' }, { label: 'Inventory', view: 'STOCK' }, { label: 'Intelligence', view: 'AI' }] as const).map((item) => <button className={`block w-full rounded-xl px-4 py-3 text-left font-semibold ${activeView === item.view ? 'bg-teal-50 text-teal-800' : 'text-slate-700 hover:bg-slate-50'}`} key={item.view} onClick={() => { setActiveView(item.view); setDrawerOpen(false) }} type="button">{item.label}</button>)}<a className="mt-4 block rounded-xl border border-slate-200 px-4 py-3 font-semibold text-slate-700" href="/kds" target="_blank">Open kitchen display</a></nav></aside></div> : null}
+      {drawerOpen ? <div className="fixed inset-0 z-30 bg-slate-950/30" onClick={() => setDrawerOpen(false)}><aside className="h-full w-72 bg-white p-5 shadow-2xl" onClick={(event) => event.stopPropagation()}><p className="text-sm font-bold tracking-wide text-teal-700">BITEPOS</p><h2 className="mt-1 text-xl font-bold">Workspace</h2><nav className="mt-8 space-y-2">{([{ label: 'Point of sale', view: 'POS' }, { label: 'Item availability', view: 'AVAILABILITY' }, { label: 'Inventory', view: 'STOCK' }, { label: 'Intelligence', view: 'AI' }] as const).map((item) => <button className={`block w-full rounded-xl px-4 py-3 text-left font-semibold ${activeView === item.view ? 'bg-teal-50 text-teal-800' : 'text-slate-700 hover:bg-slate-50'}`} key={item.view} onClick={() => { setActiveView(item.view); setDrawerOpen(false) }} type="button">{item.label}</button>)}<a className="mt-4 block rounded-xl border border-slate-200 px-4 py-3 font-semibold text-slate-700" href="/kds" target="_blank">Open kitchen display</a></nav></aside></div> : null}
     </main>
   )
 }

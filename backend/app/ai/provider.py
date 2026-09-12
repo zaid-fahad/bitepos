@@ -123,5 +123,8 @@ _REGISTRY: dict[str, type[LLMProvider]] = {
 def get_llm_provider() -> LLMProvider:
     """Instantiate the correct adapter from the LLM_PROVIDER env var."""
     name = os.environ.get("LLM_PROVIDER", "mock").lower()
+    required_key = {"gemini": "GEMINI_API_KEY", "claude": "ANTHROPIC_API_KEY", "openai": "OPENAI_API_KEY"}.get(name)
+    if required_key and not os.environ.get(required_key):
+        return MockAdapter()
     cls = _REGISTRY.get(name, MockAdapter)
     return cls()

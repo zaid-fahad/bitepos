@@ -59,13 +59,13 @@ export function AICopilotTab() {
 
   return (
     <div className="flex flex-col gap-4 px-4 pb-6">
-      <h2 className="text-lg font-bold">🤖 AI Co-Pilot</h2>
+      <h2 className="text-lg font-bold">Intelligence workspace</h2>
 
       {/* WasteLess Promotions */}
       <section className="rounded-3xl border border-stone-700 bg-stone-800 p-5">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-bold text-emerald-300">🥦 WasteLess Agent</p>
+            <p className="text-sm font-bold text-emerald-700">WasteLess agent</p>
             <p className="text-xs text-stone-400 mt-0.5">Off-peak discount suggestions</p>
           </div>
           <button
@@ -100,7 +100,7 @@ export function AICopilotTab() {
       <section className="rounded-3xl border border-stone-700 bg-stone-800 p-5">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-bold text-amber-300">🌙 End-of-Day Recap</p>
+            <p className="text-sm font-bold text-amber-700">End-of-day recap</p>
             <p className="text-xs text-stone-400 mt-0.5">AI financial summary + thermal slip</p>
           </div>
           <button

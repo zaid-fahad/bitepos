@@ -12,6 +12,11 @@ export async function fetchDishes(): Promise<Dish[]> {
   return response.json() as Promise<Dish[]>
 }
 
+export async function setDishAvailability(dishId: string, active: boolean): Promise<void> {
+  const response = await fetch(`${apiBaseUrl}/api/dishes/${dishId}/availability`, { body: JSON.stringify({ active }), headers: { 'Content-Type': 'application/json' }, method: 'PATCH' })
+  if (!response.ok) throw new Error('Unable to update item availability.')
+}
+
 export async function simulatePayment(input: {
   amount: number
   items: CartItem[]
