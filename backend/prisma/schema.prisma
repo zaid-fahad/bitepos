@@ -81,6 +81,8 @@ model Order {
   grandTotal       Decimal       @db.Decimal(12, 2)
   paymentMethod    PaymentMethod
   driverEtaMinutes Int?
+  customerName     String        @default("Walk-in")
+  driverName       String?
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
   items            OrderItem[]

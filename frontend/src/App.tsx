@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 
+import { KdsScreen } from './components/KdsScreen'
 import { useCart } from './hooks/useCart'
 import { fetchDishes, paymentSocketUrl, simulatePayment } from './services/api'
 import type { Dish, DishCategory, PaymentConfirmedEvent, PaymentMethod } from './types/dish'
@@ -32,6 +33,7 @@ function buildBanglaQrPayload(amount: number, reference: string) {
 function App() {
   const [dishes, setDishes] = useState<Dish[]>([])
   const [activeCategory, setActiveCategory] = useState<CategoryTab['category']>('LOCAL_MEALS')
+  const [activeView, setActiveView] = useState<'POS' | 'KDS'>('POS')
   const [discountPercent, setDiscountPercent] = useState(0)
   const [isPaymentOpen, setIsPaymentOpen] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('bKash')
@@ -109,7 +111,9 @@ function App() {
           <span className="font-bold">AI prep alert:</span> Rain at 1 PM — prepare 20% more delivery portions.
         </aside>
 
-        <nav className="flex gap-2 overflow-x-auto px-4 pb-4" aria-label="Menu categories">
+        <div className="mx-4 mb-4 grid grid-cols-2 rounded-xl bg-stone-800 p-1" aria-label="POS view switcher"><button className={`min-h-11 rounded-lg text-sm font-bold ${activeView === 'POS' ? 'bg-orange-500 text-stone-950' : 'text-stone-300'}`} onClick={() => setActiveView('POS')} type="button">POS</button><button className={`min-h-11 rounded-lg text-sm font-bold ${activeView === 'KDS' ? 'bg-orange-500 text-stone-950' : 'text-stone-300'}`} onClick={() => setActiveView('KDS')} type="button">Kitchen KDS</button></div>
+
+        {activeView === 'POS' ? <><nav className="flex gap-2 overflow-x-auto px-4 pb-4" aria-label="Menu categories">
           {categoryTabs.map((tab) => (
             <button
               className={`min-h-12 shrink-0 rounded-xl px-4 text-sm font-bold transition ${
@@ -215,7 +219,7 @@ function App() {
               Charge {currency.format(grandTotal)}
             </button>
           </section>
-        </div>
+        </div></> : <KdsScreen />}
 
         <footer className="h-12 border-t-4 border-dashed border-stone-700 bg-stone-950 text-center text-xs font-semibold tracking-[0.25em] text-stone-500">
           THERMAL PRINTER SLOT

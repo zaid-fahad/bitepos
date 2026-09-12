@@ -1,7 +1,7 @@
 from fastapi import WebSocket
 
 
-class PaymentConnectionManager:
+class ConnectionManager:
     def __init__(self) -> None:
         self._connections: list[WebSocket] = []
 
@@ -21,4 +21,5 @@ class PaymentConnectionManager:
                 self.disconnect(connection)
 
 
-payment_connections = PaymentConnectionManager()
+payment_connections = ConnectionManager()
+order_connections = ConnectionManager()

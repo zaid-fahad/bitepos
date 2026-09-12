@@ -22,3 +22,16 @@ export interface PaymentConfirmedEvent {
   order_id: string
   reference: string
 }
+
+export type OrderChannel = 'IN_STORE' | 'FOODPANDA' | 'PATHAO' | 'FOODI'
+
+export interface KdsOrder {
+  id: string
+  channel: OrderChannel
+  status: 'PENDING' | 'PREPARING' | 'READY'
+  customer_name: string
+  driver_name: string | null
+  driver_eta_minutes: number | null
+  grand_total: number
+  items: { name: string; quantity: number }[]
+}

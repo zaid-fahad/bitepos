@@ -1,4 +1,4 @@
-import type { CartItem, Dish, PaymentMethod } from '../types/dish'
+import type { CartItem, Dish, KdsOrder, OrderChannel, PaymentMethod } from '../types/dish'
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
 
@@ -41,3 +41,21 @@ export async function simulatePayment(input: {
 export function paymentSocketUrl(): string {
   return apiBaseUrl.replace(/^http/, 'ws') + '/ws/payments'
 }
+
+export async function fetchKdsOrders(): Promise<KdsOrder[]> {
+  const response = await fetch(`${apiBaseUrl}/api/orders/kds`)
+  if (!response.ok) throw new Error('Unable to load kitchen orders.')
+  return response.json() as Promise<KdsOrder[]>
+}
+
+export async function simulateKdsOrder(channel: OrderChannel): Promise<void> {
+  const response = await fetch(`${apiBaseUrl}/api/orders/simulate`, { body: JSON.stringify({ channel }), headers: { 'Content-Type': 'application/json' }, method: 'POST' })
+  if (!response.ok) throw new Error('Unable to stream a demo order.')
+}
+
+export async function bumpKdsOrder(orderId: string): Promise<void> {
+  const response = await fetch(`${apiBaseUrl}/api/orders/${orderId}/bump`, { method: 'PATCH' })
+  if (!response.ok) throw new Error('Unable to bump the order.')
+}
+
+export function orderSocketUrl(): string { return apiBaseUrl.replace(/^http/, 'ws') + '/ws/orders' }

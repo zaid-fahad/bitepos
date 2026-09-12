@@ -6,7 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import db
 from app.routers.dishes import router as dishes_router
 from app.routers.payments import router as payments_router
-from app.realtime import payment_connections
+from app.routers.orders import router as orders_router
+from app.realtime import order_connections, payment_connections
 
 
 @asynccontextmanager
@@ -30,6 +31,7 @@ app.add_middleware(
 
 app.include_router(dishes_router)
 app.include_router(payments_router)
+app.include_router(orders_router)
 
 
 @app.websocket("/ws/payments")
@@ -40,6 +42,16 @@ async def payment_events(websocket: WebSocket) -> None:
             await websocket.receive_text()
     except WebSocketDisconnect:
         payment_connections.disconnect(websocket)
+
+
+@app.websocket("/ws/orders")
+async def order_events(websocket: WebSocket) -> None:
+    await order_connections.connect(websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        order_connections.disconnect(websocket)
 
 
 @app.get("/health")
