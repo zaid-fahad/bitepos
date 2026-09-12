@@ -35,6 +35,10 @@ DISHES = [
         "stockCount": 10,
         "shelfLifeHours": 24,
     },
+    {"name": "Classic Beef Burger", "category": "FAST_FOOD", "price": Decimal("280.00"), "stockCount": 18, "shelfLifeHours": 5},
+    {"name": "Crispy Fried Chicken", "category": "FAST_FOOD", "price": Decimal("240.00"), "stockCount": 20, "shelfLifeHours": 4},
+    {"name": "Lemon Mint Cooler", "category": "DRINKS", "price": Decimal("80.00"), "stockCount": 24, "shelfLifeHours": 8},
+    {"name": "Mango Lassi", "category": "DRINKS", "price": Decimal("110.00"), "stockCount": 16, "shelfLifeHours": 6},
 ]
 
 INGREDIENTS = [

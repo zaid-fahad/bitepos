@@ -12,3 +12,10 @@ body {
 }
 
 button { cursor: pointer; }
+
+/* Legacy operational panels share the new light product surface until their
+   individual workflows are redesigned. */
+.bg-stone-950, .bg-stone-900, .bg-stone-800, .bg-stone-700 { background-color: #ffffff !important; }
+.border-stone-700, .border-stone-800, .border-stone-600 { border-color: #e2e8f0 !important; }
+.text-stone-50, .text-stone-100, .text-stone-200, .text-stone-300 { color: #0f172a !important; }
+.text-stone-400, .text-stone-500 { color: #64748b !important; }
